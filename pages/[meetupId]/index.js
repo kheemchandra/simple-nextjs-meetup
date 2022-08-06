@@ -1,31 +1,8 @@
+import { MongoClient, ObjectId } from 'mongodb';
+
 import MeetupDetail from "../../components/meetups/MeetupDetail";
 
-const DUMMY_MEETUPS = [
-  {
-    id: "m1",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Estadio_Alfheim%2C_Troms%C3%B8%2C_Noruega%2C_2019-09-04%2C_DD_32.jpg/2560px-Estadio_Alfheim%2C_Troms%C3%B8%2C_Noruega%2C_2019-09-04%2C_DD_32.jpg",
-    title: "Meetup First Title",
-    address: "Some street 5, some city",
-    description: "This is First Meetup",
-  },
-  {
-    id: "m2",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Estadio_Alfheim%2C_Troms%C3%B8%2C_Noruega%2C_2019-09-04%2C_DD_32.jpg/2560px-Estadio_Alfheim%2C_Troms%C3%B8%2C_Noruega%2C_2019-09-04%2C_DD_32.jpg",
-    title: "Meetup Second Title",
-    address: "Some street 15, some city",
-    description: "This is second Meetup",
-  },
-  {
-    id: "m3",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Estadio_Alfheim%2C_Troms%C3%B8%2C_Noruega%2C_2019-09-04%2C_DD_32.jpg/2560px-Estadio_Alfheim%2C_Troms%C3%B8%2C_Noruega%2C_2019-09-04%2C_DD_32.jpg",
-    title: "Meetup Third Title",
-    address: "Some street 105, some third city",
-    description: "This is third Meetup place",
-  },
-];
+
 
 export async function getStaticPaths() {
   return {
@@ -44,28 +21,43 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps (context){ 
+  const meetupId = context.params.meetupId;
+  const meetupIdObj = new ObjectId(meetupId);
+
+  const url = 
+  "mongodb+srv://Ashudhanik:akdJfCRAt8sCwD5l@cluster0.ump5roa.mongodb.net/meetups?retryWrites=true&w=majority";
+  const client = new MongoClient(url);
+
+  const db = client.db();
+
+  const col = db.collection('meetups');
+  
+  const selectedMeetup = await col.findOne({_id: new ObjectId(meetupId)});
+
+  await client.close();
+
   return {
     props: {
-      meetupId: context.params.meetupId
+      meetup: { 
+        id: selectedMeetup._id.toString(),
+        title: selectedMeetup.title,
+        image: selectedMeetup.image,
+        address: selectedMeetup.address,
+        description: selectedMeetup.description
+      }
     }
   };
 }
 
 
-const Meetup = (props) => {
-
-  const selectedMeetupId = props.meetupId
-
-  const selectedMeetup = DUMMY_MEETUPS.find(
-    (meetup) => meetup.id === selectedMeetupId
-  );
+const Meetup = (props) => {  
 
   return (
     <MeetupDetail
-      image={selectedMeetup.image}
-      title={selectedMeetup.title}
-      address={selectedMeetup.address}
-      description={selectedMeetup.description}
+      image={props.meetup.image}
+      title={props.meetup.title}
+      address={props.meetup.address}
+      description={props.meetup.description}
     />
   );
 };
