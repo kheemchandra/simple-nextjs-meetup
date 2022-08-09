@@ -1,9 +1,20 @@
+import { Fragment } from 'react';
+import Head from 'next/head';
 import { MongoClient } from 'mongodb';
 
 import MeetupList from "../components/meetups/MeetupList";
  
 const HomePage = (props) => { 
-  return <MeetupList meetups={props.meetupData} />
+  return <Fragment>
+    <Head>
+      <title>React Meetups</title>
+      <meta
+        name='description'
+        content='Check all meetups here!'
+      />
+    </Head>
+    <MeetupList meetups={props.meetupData} />
+  </Fragment>
 };
 
  
